@@ -186,8 +186,14 @@ else:  # Display Tickets
 
         fig, ax = plt.subplots(figsize=(5, 3))
         ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'],
-               textprops={'color': 'black'})
+               textprops={'color': 'white'})
         ax.axis('equal')
+
+        # Set background color of the pie chart to transparent
+        fig.patch.set_facecolor('none')
+        ax.set_facecolor('none')
+
+        st.pyplot(fig)
 
         # Set background color of the pie chart to transparent
         fig.patch.set_facecolor('none')
