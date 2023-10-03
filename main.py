@@ -147,11 +147,11 @@ else:  # Display Tickets
             for _, row in dataframe.iterrows():
                 checks_count = row[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum()
                 if checks_count == 1:
-                    style = 'background-color: #FFB6B6;'  # Light Red
+                    style = 'background-color: #FFD6D6;'  # Very Light Red
                 elif 1 < checks_count < 5:
-                    style = 'background-color: #FFFFB3;'  # Light Yellow
+                    style = 'background-color: #FFFFD6;'  # Very Light Yellow
                 elif checks_count == 5:
-                    style = 'background-color: #B3FFB3;'  # Light Green
+                    style = 'background-color: #D6FFD6;'  # Very Light Green
                 else:
                     style = ''
                 styles.append(style)
@@ -163,7 +163,6 @@ else:  # Display Tickets
             headers = '<tr>' + ''.join(f'<th>{col}</th>' for col in dataframe.columns) + '</tr>'
             table = f'<table>{headers}' + ''.join(rows) + '</table>'
             return table
-
 
         html_string = generate_html_table(df)
         st.markdown(html_string, unsafe_allow_html=True)
