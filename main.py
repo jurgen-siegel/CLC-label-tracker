@@ -179,24 +179,25 @@ else:  # Display Tickets
         completed_count = df['completed'].sum()
         in_progress_count = df['in_progress'].sum()
         just_started_count = df['just_started'].sum()
-        total_tickets = len(df)
 
         labels = ['Completed', 'In Progress', 'Just Started']
         sizes = [completed_count, in_progress_count, just_started_count]
 
-        fig, ax = plt.subplots(figsize=(5, 3))
-        ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'],
-               textprops={'color': 'white'})
-        ax.axis('equal')
+        # Check if there's any data to plot
+        if sum(sizes) > 0:
+            fig, ax = plt.subplots(figsize=(5, 3))
+            ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'],
+                   textprops={'color': 'white'})
+            ax.axis('equal')
 
-        # Set background color of the pie chart to transparent
-        fig.patch.set_facecolor('none')
-        ax.set_facecolor('none')
+            # Set background color of the pie chart to transparent
+            fig.patch.set_facecolor('none')
+            ax.set_facecolor('none')
 
-        st.pyplot(fig)
+            st.pyplot(fig)
+        else:
+            st.write("No matching tickets for the search criteria.")
 
-    else:
-        st.write("No tickets available to display.")
 st.write("--------------------------------------------------------------------------")
 st.markdown("**Note: To manage tickets, follow these steps:**")
 st.write("1. Write down the ticket number, name, and description.")
