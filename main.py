@@ -141,6 +141,7 @@ else:  # Display Tickets
             df = df[df[['Ticket #', 'Customer', 'Description']].apply(
                 lambda row: row.astype(str).str.contains(search_query).any(), axis=1)]
 
+
         # Generate HTML table with color coding
         def generate_html_table(dataframe):
             styles = []
