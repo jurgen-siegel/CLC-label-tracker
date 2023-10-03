@@ -3,16 +3,20 @@ import pandas as pd
 from pymongo import MongoClient
 import io
 import matplotlib.pyplot as plt
-import os
 
 # Layout settings
 st.set_page_config(layout="wide")
 
+# Retrieve MongoDB URI from environment variable
 MONGO_URI = os.environ.get("MONGO_URI")
 if not MONGO_URI:
     st.error("Missing MongoDB URI. Please set the MONGO_URI environment variable.")
     st.stop()
+
+# Connect to MongoDB using the retrieved URI
 client = MongoClient(MONGO_URI)
+db = client.label_tracker
+collection = db.tickets
 
 # App title
 st.title('Label Progress')
