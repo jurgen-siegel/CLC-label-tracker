@@ -169,16 +169,24 @@ else:  # Display Tickets
         st.markdown(html_string, unsafe_allow_html=True)
 
         # Pie chart data
-        df['completed'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(axis=1) == 5
+        df['completed'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1) == 5
+        df['in_progress'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1).between(2, 4)
+        df['just_started'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1) == 1
+
         completed_count = df['completed'].sum()
+        in_progress_count = df['in_progress'].sum()
+        just_started_count = df['just_started'].sum()
         total_tickets = len(df)
 
-        labels = ['Completed', 'Incomplete']
-        sizes = [completed_count, total_tickets - completed_count]
+        labels = ['Completed', 'In Progress', 'Just Started']
+        sizes = [completed_count, in_progress_count, just_started_count]
 
         fig, ax = plt.subplots(figsize=(5, 3))
-        ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=['green', 'red'],
-               textprops={'color': 'white'})
+        ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'],
+               textprops={'color': 'black'})
         ax.axis('equal')
 
         # Set background color of the pie chart to transparent
@@ -186,6 +194,7 @@ else:  # Display Tickets
         ax.set_facecolor('none')
 
         st.pyplot(fig)
+
     else:
         st.write("No tickets available to display.")
 st.write("--------------------------------------------------------------------------")
