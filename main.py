@@ -148,6 +148,8 @@ else:  # Display Tickets
                 checks_count = row[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum()
                 if checks_count == 1:
                     style = 'background-color: red;'
+                elif 1 < checks_count < 5:
+                    style = 'background-color: yellow;'
                 elif checks_count == 5:
                     style = 'background-color: green;'
                 else:
