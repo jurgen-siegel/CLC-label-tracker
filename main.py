@@ -3,6 +3,7 @@ import pandas as pd
 from pymongo import MongoClient
 import io
 import matplotlib.pyplot as plt
+import os
 
 # Layout settings
 st.set_page_config(layout="wide")
