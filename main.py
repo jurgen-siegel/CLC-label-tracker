@@ -148,8 +148,6 @@ else:  # Display Tickets
                 checks_count = row[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum()
                 if checks_count == 1:
                     style = 'background-color: red;'
-                elif 1 < checks_count < 5:
-                    style = 'background-color: yellow;'
                 elif checks_count == 5:
                     style = 'background-color: green;'
                 else:
@@ -163,6 +161,9 @@ else:  # Display Tickets
             headers = '<tr>' + ''.join(f'<th>{col}</th>' for col in dataframe.columns) + '</tr>'
             table = f'<table>{headers}' + ''.join(rows) + '</table>'
             return table
+
+        html_string = generate_html_table(df)
+        st.markdown(html_string, unsafe_allow_html=True)
 
         # Pie chart data
         df['completed'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(axis=1) == 5
