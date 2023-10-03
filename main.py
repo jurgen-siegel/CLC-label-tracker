@@ -195,12 +195,6 @@ else:  # Display Tickets
 
         st.pyplot(fig)
 
-        # Set background color of the pie chart to transparent
-        fig.patch.set_facecolor('none')
-        ax.set_facecolor('none')
-
-        st.pyplot(fig)
-
     else:
         st.write("No tickets available to display.")
 st.write("--------------------------------------------------------------------------")
