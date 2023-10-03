@@ -52,10 +52,9 @@ if page == "Manage Tickets":
     # Display existing tickets for management
     st.subheader('Existing Tickets')
     tickets = list(collection.find({}))
+    for ticket in tickets:
+        ticket['_id'] = str(ticket['_id'])
     df = pd.DataFrame(tickets)
-
-    # Drop the _id column
-    df = df.drop(columns=['_id'])
 
     st.write(df)
 
@@ -112,14 +111,15 @@ if page == "Manage Tickets":
     else:
         st.write("No tickets available to edit.")
 
+
 else:  # Display Tickets
     st.subheader('All Tickets')
 
     tickets = list(collection.find({}))
+    for ticket in tickets:
+        ticket['Completed'] = all([ticket['Artwork Received'], ticket['Physical Proof'], ticket['Digital Approved'], ticket['Sample'], ticket['Quote']])
+        del ticket['_id']
     df = pd.DataFrame(tickets)
-
-    # Drop the _id column for display
-    df = df.drop(columns=['_id'])
 
     # Check if there are any tickets to display
     if not df.empty:
@@ -157,57 +157,57 @@ else:  # Display Tickets
                     style = 'color: black;'
                 styles.append(style)
 
-                for (index, row), style in zip(dataframe.iterrows(), styles):
-                    row_str = f'<tr style="{style}">' + ''.join(f'<td>{cell}</td>' for cell in row) + '</tr>'
-                    rows.append(row_str)
+            for (index, row), style in zip(dataframe.iterrows(), styles):
+                row_str = f'<tr style="{style}">' + ''.join(f'<td>{cell}</td>' for cell in row) + '</tr>'
+                rows.append(row_str)
 
-                headers = '<tr>' + ''.join(f'<th>{col}</th>' for col in dataframe.columns) + '</tr>'
-                table = f'<table>{headers}' + ''.join(rows) + '</table>'
-                return table
-
-            html_string = generate_html_table(df)
-            st.markdown(html_string, unsafe_allow_html=True)
-
-            # Pie chart data
-            df['completed'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
-                axis=1) == 5
-            df['in_progress'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
-                axis=1).between(2, 4)
-            df['just_started'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
-                axis=1) == 1
-
-            completed_count = df['completed'].sum()
-            in_progress_count = df['in_progress'].sum()
-            just_started_count = df['just_started'].sum()
-
-            labels = ['Completed', 'In Progress', 'Just Started']
-            sizes = [completed_count, in_progress_count, just_started_count]
-
-            # Check if there's any data to plot
-            if sum(sizes) > 0:
-                fig, ax = plt.subplots(figsize=(5, 3))
-                ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'],
-                       textprops={'color': 'white'})
-                ax.axis('equal')
-
-                # Set background color of the pie chart to transparent
-                fig.patch.set_facecolor('none')
-                ax.set_facecolor('none')
-
-                st.pyplot(fig)
-            else:
-                st.write("No matching tickets for the search criteria.")
+            headers = '<tr>' + ''.join(f'<th>{col}</th>' for col in dataframe.columns) + '</tr>'
+            table = f'<table>{headers}' + ''.join(rows) + '</table>'
+            return table
 
 
-        st.write("--------------------------------------------------------------------------")
-        st.markdown("**Note: To manage tickets, follow these steps:**")
-        st.write("1. Write down the ticket number, name, and description.")
-        st.write("2. Check the appropriate boxes to indicate progress.")
-        st.write("3. Click 'Add Ticket' to create a new ticket.")
+        html_string = generate_html_table(df)
+        st.markdown(html_string, unsafe_allow_html=True)
 
-        st.write("To edit an existing ticket:")
-        st.write("1. Pick the ticket number you want to modify.")
-        st.write("2. Make the necessary changes.")
-        st.write("3. Click 'Update Ticket' to save your changes.")
+        # Pie chart data
+        df['completed'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1) == 5
+        df['in_progress'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1).between(2, 4)
+        df['just_started'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1) == 1
 
-        st.write("To view all tickets, click on 'Display Tickets' at the top of the page.")
+        completed_count = df['completed'].sum()
+        in_progress_count = df['in_progress'].sum()
+        just_started_count = df['just_started'].sum()
+
+        labels = ['Completed', 'In Progress', 'Just Started']
+        sizes = [completed_count, in_progress_count, just_started_count]
+
+        # Check if there's any data to plot
+        if sum(sizes) > 0:
+            fig, ax = plt.subplots(figsize=(5, 3))
+            ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'],
+                   textprops={'color': 'white'})
+            ax.axis('equal')
+
+            # Set background color of the pie chart to transparent
+            fig.patch.set_facecolor('none')
+            ax.set_facecolor('none')
+
+            st.pyplot(fig)
+        else:
+            st.write("No matching tickets for the search criteria.")
+
+st.write("--------------------------------------------------------------------------")
+st.markdown("**Note: To manage tickets, follow these steps:**")
+st.write("1. Write down the ticket number, name, and description.")
+st.write("2. Check the appropriate boxes to indicate progress.")
+st.write("3. Click 'Add Ticket' to create a new ticket.")
+
+st.write("To edit an existing ticket:")
+st.write("1. Pick the ticket number you want to modify.")
+st.write("2. Make the necessary changes.")
+st.write("3. Click 'Update Ticket' to save your changes.")
+
+st.write("To view all tickets, click on 'Display Tickets' at the top of the page.")
