@@ -25,6 +25,9 @@ st.title('Label Progress')
 page = st.radio("Pages", ["Manage Tickets", "Display Tickets"])
 
 if page == "Manage Tickets":
+# Add new ticket
+
+if page == "Manage Tickets":
     st.subheader('Update Existing Ticket')
 
     # Dropdown to select a ticket to update
@@ -143,7 +146,6 @@ if not df.empty:
 else:
     st.write("No tickets available to edit.")
 
-else:  # Display Tickets
 st.subheader('All Tickets')
 
 tickets = list(collection.find({}))
