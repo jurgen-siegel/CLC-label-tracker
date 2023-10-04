@@ -36,13 +36,15 @@ if page == "Manage Tickets":
     selected_ticket = collection.find_one({'Ticket #': selected_ticket_num})
 
     # Pre-fill the fields with the selected ticket's data
-    customer = st.text_input('Customer', value=selected_ticket['Customer'])
-    description = st.text_input('Description', value=selected_ticket['Description'])
-    artwork_received = st.checkbox('Artwork Received', value=selected_ticket['Artwork Received'])
-    physical_proof = st.checkbox('Physical Proof', value=selected_ticket['Physical Proof'])
-    digital_approved = st.checkbox('Digital Approved', value=selected_ticket['Digital Approved'])
-    sample = st.checkbox('Sample', value=selected_ticket['Sample'])
-    quote = st.checkbox('Quote', value=selected_ticket['Quote'])
+    customer = st.text_input('Customer', key='update_customer', value=selected_ticket['Customer'])
+    description = st.text_input('Description', key='update_description', value=selected_ticket['Description'])
+    artwork_received = st.checkbox('Artwork Received', key='update_artwork_received',
+                                   value=selected_ticket['Artwork Received'])
+    physical_proof = st.checkbox('Physical Proof', key='update_physical_proof', value=selected_ticket['Physical Proof'])
+    digital_approved = st.checkbox('Digital Approved', key='update_digital_approved',
+                                   value=selected_ticket['Digital Approved'])
+    sample = st.checkbox('Sample', key='update_sample', value=selected_ticket['Sample'])
+    quote = st.checkbox('Quote', key='update_quote', value=selected_ticket['Quote'])
 
     # Update button
     if st.button('Update Ticket'):
