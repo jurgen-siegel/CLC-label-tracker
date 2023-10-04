@@ -47,7 +47,7 @@ if page == "Manage Tickets":
     quote = st.checkbox('Quote', key='update_quote', value=selected_ticket['Quote'])
 
     # Update button
-    if st.button('Update Ticket'):
+    if st.button('Update Ticket', key='update_ticket_button'):
         updated_data = {
             'Customer': customer,
             'Description': description,
@@ -65,12 +65,12 @@ ticket_num = st.text_input('Ticket #')
 customer = st.text_input('Customer')
 description = st.text_input('Description')
 artwork_received = st.checkbox('Artwork Received')
-physical_proof = st.checkbox('Physical Proof')
+physical_proof = st.checkbox('Physical Proof', key='add_physical_proof')
 digital_approved = st.checkbox('Digital Approved')
 sample = st.checkbox('Sample')
 quote = st.checkbox('Quote')
 
-if st.button('Add Ticket'):
+if st.button('Add Ticket', key='add_ticket_button'):
     new_data = {
         'Ticket #': ticket_num,
         'Customer': customer,
@@ -129,7 +129,7 @@ if not df.empty:
         sample_edit = st.checkbox('Edit Sample', value=False)
         quote_edit = st.checkbox('Edit Quote', value=False)
 
-    if st.button('Update Ticket'):
+    if st.button('Update Ticket', key='update_ticket_button'):
         updated_data = {
             'Ticket #': ticket_num_edit,
             'Customer': customer_edit,
