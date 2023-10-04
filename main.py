@@ -26,17 +26,40 @@ page = st.radio("Pages", ["Manage Tickets", "Display Tickets"])
 
 if page == "Manage Tickets":
     # Add new ticket
-    st.subheader('Add New Ticket')
-    ticket_num = st.text_input('Ticket #')
-    customer = st.text_input('Customer')
-    description = st.text_input('Description')
-    artwork_received = st.checkbox('Artwork Received')
-    physical_proof = st.checkbox('Physical Proof')
-    digital_approved = st.checkbox('Digital Approved')
-    sample = st.checkbox('Sample')
-    quote = st.checkbox('Quote')
+    st.subheader('Update Existing Ticket')
 
-    if st.button('Add Ticket'):
+    # Dropdown to select a ticket to update
+    existing_tickets = list(collection.find({}))
+    ticket_numbers = [str(ticket['Ticket #']) for ticket in existing_tickets]
+    selected_ticket_num = st.selectbox('Select Ticket # to update', ticket_numbers)
+
+    # Retrieve the selected ticket's data from the database
+    selected_ticket = collection.find_one({'Ticket #': selected_ticket_num})
+
+    # Pre-fill the fields with the selected ticket's data
+    customer = st.text_input('Customer', value=selected_ticket['Customer'])
+    description = st.text_input('Description', value=selected_ticket['Description'])
+    artwork_received = st.checkbox('Artwork Received', value=selected_ticket['Artwork Received'])
+    physical_proof = st.checkbox('Physical Proof', value=selected_ticket['Physical Proof'])
+    digital_approved = st.checkbox('Digital Approved', value=selected_ticket['Digital Approved'])
+    sample = st.checkbox('Sample', value=selected_ticket['Sample'])
+    quote = st.checkbox('Quote', value=selected_ticket['Quote'])
+
+    # Update button
+    if st.button('Update Ticket'):
+        updated_data = {
+            'Customer': customer,
+            'Description': description,
+            'Artwork Received': artwork_received,
+            'Physical Proof': physical_proof,
+            'Digital Approved': digital_approved,
+            'Sample': sample,
+            'Quote': quote
+        }
+        collection.update_one({'Ticket #': selected_ticket_num}, {'$set': updated_data})
+        st.success('Ticket updated successfully!')
+
+if st.button('Add Ticket'):
         new_data = {
             'Ticket #': ticket_num,
             'Customer': customer,
