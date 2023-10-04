@@ -25,59 +25,18 @@ st.title('Label Progress')
 page = st.radio("Pages", ["Manage Tickets", "Display Tickets"])
 
 if page == "Manage Tickets":
-    if "update_ticket_pressed" not in st.session_state:
-        st.session_state.update_ticket_pressed = False
-    st.subheader('Update Existing Ticket')
-
-    # Dropdown to select a ticket to update
-    existing_tickets = list(collection.find({}))
-    ticket_numbers = [str(ticket['Ticket #']) for ticket in existing_tickets]
-    selected_ticket_num = st.selectbox('Select Ticket # to update', ticket_numbers, key="update_ticket_selectbox")
-
-    # Retrieve the selected ticket's data from the database
-    selected_ticket = collection.find_one({'Ticket #': selected_ticket_num})
-
-    # Pre-fill the fields with the selected ticket's data
-    customer = st.text_input('Customer', key='update_customer', value=selected_ticket['Customer'])
-    description = st.text_input('Description', key='update_description', value=selected_ticket['Description'])
-    artwork_received = st.checkbox('Artwork Received', key='update_artwork_received',
-                                   value=selected_ticket['Artwork Received'])
-    physical_proof = st.checkbox('Physical Proof', key='update_physical_proof', value=selected_ticket['Physical Proof'])
-    digital_approved = st.checkbox('Digital Approved', key='update_digital_approved',
-                                   value=selected_ticket['Digital Approved'])
-    sample = st.checkbox('Sample', key='update_sample', value=selected_ticket['Sample'])
-    quote = st.checkbox('Quote', key='update_quote', value=selected_ticket['Quote'])
-
-    # Update button
-    if st.button('Update Ticket', key='update_ticket_button'):
-        st.session_state.update_ticket_pressed = True
-if st.session_state.update_ticket_pressed:
-    updated_data = {
-        'Customer': customer,
-        'Description': description,
-        'Artwork Received': artwork_received,
-        'Physical Proof': physical_proof,
-        'Digital Approved': digital_approved,
-        'Sample': sample,
-        'Quote': quote
-    }
-    collection.update_one({'Ticket #': selected_ticket_num}, {'$set': updated_data})
-    st.success('Ticket updated successfully!')
-
-manage_option = st.radio("Choose an action", ["Add New Ticket", "Update Existing Ticket"])
-
-if manage_option == "Add New Ticket":
+    # Add new ticket
     st.subheader('Add New Ticket')
     ticket_num = st.text_input('Ticket #')
     customer = st.text_input('Customer')
     description = st.text_input('Description')
     artwork_received = st.checkbox('Artwork Received')
-    physical_proof = st.checkbox('Physical Proof', key='add_physical_proof')
+    physical_proof = st.checkbox('Physical Proof')
     digital_approved = st.checkbox('Digital Approved')
     sample = st.checkbox('Sample')
     quote = st.checkbox('Quote')
 
-    if st.button('Add Ticket', key='add_ticket_button'):
+    if st.button('Add Ticket'):
         new_data = {
             'Ticket #': ticket_num,
             'Customer': customer,
@@ -136,112 +95,110 @@ if manage_option == "Add New Ticket":
             sample_edit = st.checkbox('Edit Sample', value=False)
             quote_edit = st.checkbox('Edit Quote', value=False)
 
-        if st.button('Update Ticket', key='update_ticket_button'):
-            st.session_state.update_ticket_pressed = True
-if st.session_state.update_ticket_pressed:
-    updated_data = {
-        'Ticket #': ticket_num_edit,
-        'Customer': customer_edit,
-        'Description': description_edit,
-        'Artwork Received': artwork_received_edit,
-        'Physical Proof': physical_proof_edit,
-        'Digital Approved': digital_approved_edit,
-        'Sample': sample_edit,
-        'Quote': quote_edit
-    }
-    collection.update_one({'Ticket #': edit_ticket_num}, {'$set': updated_data})
-    st.success('Ticket updated successfully!')
-else:
-    st.write("No tickets available to edit.")
-
-st.subheader('All Tickets')
-
-tickets = list(collection.find({}))
-for ticket in tickets:
-    ticket['Completed'] = all(
-        [ticket['Artwork Received'], ticket['Physical Proof'], ticket['Digital Approved'], ticket['Sample'],
-         ticket['Quote']])
-    del ticket['_id']
-df = pd.DataFrame(tickets)
-
-# Check if there are any tickets to display
-if not df.empty:
-    # Excel download button
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, sheet_name='Tickets', index=False)
-    excel_data = output.getvalue()
-    st.download_button(
-        label="Download Excel file",
-        data=excel_data,
-        file_name="tickets.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-
-    # Search functionality
-    search_query = st.text_input("Search tickets (by Ticket #, Customer, Description, etc.)")
-    if search_query:
-        df = df[df[['Ticket #', 'Customer', 'Description']].apply(
-            lambda row: row.astype(str).str.contains(search_query).any(), axis=1)]
-
-
-    # Generate HTML table with color coding
-    def generate_html_table(dataframe):
-        styles = []
-        rows = []
-        for _, row in dataframe.iterrows():
-            checks_count = row[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum()
-            if checks_count == 1:
-                style = 'background-color: #FFD6D6; color: black;'  # Very Light Red
-            elif 1 < checks_count < 5:
-                style = 'background-color: #FFFFD6; color: black;'  # Very Light Yellow
-            elif checks_count == 5:
-                style = 'background-color: #D6FFD6; color: black;'  # Very Light Green
-            else:
-                style = 'color: black;'
-            styles.append(style)
-
-        for (index, row), style in zip(dataframe.iterrows(), styles):
-            row_str = f'<tr style="{style}">' + ''.join(f'<td>{cell}</td>' for cell in row) + '</tr>'
-            rows.append(row_str)
-
-        headers = '<tr>' + ''.join(f'<th>{col}</th>' for col in dataframe.columns) + '</tr>'
-        table = f'<table>{headers}' + ''.join(rows) + '</table>'
-        return table
-
-
-    html_string = generate_html_table(df)
-    st.markdown(html_string, unsafe_allow_html=True)
-
-    # Pie chart data
-    df['completed'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
-        axis=1) == 5
-    df['in_progress'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
-        axis=1).between(2, 4)
-    df['just_started'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
-        axis=1) == 1
-
-    completed_count = df['completed'].sum()
-    in_progress_count = df['in_progress'].sum()
-    just_started_count = df['just_started'].sum()
-
-    labels = ['Completed', 'In Progress', 'Just Started']
-    sizes = [completed_count, in_progress_count, just_started_count]
-
-    # Check if there's any data to plot
-    if sum(sizes) > 0:
-        fig, ax = plt.subplots(figsize=(5, 3))
-        ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'],
-               textprops={'color': 'white'})
-        ax.axis('equal')
-
-        # Set background color of the pie chart to transparent
-        fig.patch.set_facecolor('none')
-        ax.set_facecolor('none')
-
-        st.pyplot(fig)
+        if st.button('Update Ticket'):
+            updated_data = {
+                'Ticket #': ticket_num_edit,
+                'Customer': customer_edit,
+                'Description': description_edit,
+                'Artwork Received': artwork_received_edit,
+                'Physical Proof': physical_proof_edit,
+                'Digital Approved': digital_approved_edit,
+                'Sample': sample_edit,
+                'Quote': quote_edit
+            }
+            collection.update_one({'Ticket #': edit_ticket_num}, {'$set': updated_data})
+            st.success('Ticket updated successfully!')
     else:
-        st.write("No matching tickets for the search criteria.")
+        st.write("No tickets available to edit.")
+
+
+else:  # Display Tickets
+    st.subheader('All Tickets')
+
+    tickets = list(collection.find({}))
+    for ticket in tickets:
+        ticket['Completed'] = all([ticket['Artwork Received'], ticket['Physical Proof'], ticket['Digital Approved'], ticket['Sample'], ticket['Quote']])
+        del ticket['_id']
+    df = pd.DataFrame(tickets)
+
+    # Check if there are any tickets to display
+    if not df.empty:
+        # Excel download button
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, sheet_name='Tickets', index=False)
+        excel_data = output.getvalue()
+        st.download_button(
+            label="Download Excel file",
+            data=excel_data,
+            file_name="tickets.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        # Search functionality
+        search_query = st.text_input("Search tickets (by Ticket #, Customer, Description, etc.)")
+        if search_query:
+            df = df[df[['Ticket #', 'Customer', 'Description']].apply(
+                lambda row: row.astype(str).str.contains(search_query).any(), axis=1)]
+
+
+        # Generate HTML table with color coding
+        def generate_html_table(dataframe):
+            styles = []
+            rows = []
+            for _, row in dataframe.iterrows():
+                checks_count = row[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum()
+                if checks_count == 1:
+                    style = 'background-color: #FFD6D6; color: black;'  # Very Light Red
+                elif 1 < checks_count < 5:
+                    style = 'background-color: #FFFFD6; color: black;'  # Very Light Yellow
+                elif checks_count == 5:
+                    style = 'background-color: #D6FFD6; color: black;'  # Very Light Green
+                else:
+                    style = 'color: black;'
+                styles.append(style)
+
+            for (index, row), style in zip(dataframe.iterrows(), styles):
+                row_str = f'<tr style="{style}">' + ''.join(f'<td>{cell}</td>' for cell in row) + '</tr>'
+                rows.append(row_str)
+
+            headers = '<tr>' + ''.join(f'<th>{col}</th>' for col in dataframe.columns) + '</tr>'
+            table = f'<table>{headers}' + ''.join(rows) + '</table>'
+            return table
+
+
+        html_string = generate_html_table(df)
+        st.markdown(html_string, unsafe_allow_html=True)
+
+        # Pie chart data
+        df['completed'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1) == 5
+        df['in_progress'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1).between(2, 4)
+        df['just_started'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1) == 1
+
+        completed_count = df['completed'].sum()
+        in_progress_count = df['in_progress'].sum()
+        just_started_count = df['just_started'].sum()
+
+        labels = ['Completed', 'In Progress', 'Just Started']
+        sizes = [completed_count, in_progress_count, just_started_count]
+
+        # Check if there's any data to plot
+        if sum(sizes) > 0:
+            fig, ax = plt.subplots(figsize=(5, 3))
+            ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'],
+                   textprops={'color': 'white'})
+            ax.axis('equal')
+
+            # Set background color of the pie chart to transparent
+            fig.patch.set_facecolor('none')
+            ax.set_facecolor('none')
+
+            st.pyplot(fig)
+        else:
+            st.write("No matching tickets for the search criteria.")
 
 st.write("--------------------------------------------------------------------------")
 st.markdown("**Note: To manage tickets, follow these steps:**")
