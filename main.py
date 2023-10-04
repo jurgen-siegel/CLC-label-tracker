@@ -25,9 +25,6 @@ st.title('Label Progress')
 page = st.radio("Pages", ["Manage Tickets", "Display Tickets"])
 
 if page == "Manage Tickets":
-# Add new ticket
-
-if page == "Manage Tickets":
     st.subheader('Update Existing Ticket')
 
     # Dropdown to select a ticket to update
