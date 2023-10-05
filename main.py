@@ -1,4 +1,7 @@
 import streamlit as st
+
+from werkzeug.security import generate_password_hash, check_password_hash
+
 import pandas as pd
 from pymongo import MongoClient
 import io
@@ -21,6 +24,10 @@ collection = db.tickets
 
 # Create a new collection for ticket history
 ticket_history_collection = db.ticket_history
+
+# Create a collection for users
+users_collection = db.users
+
 
 
 # Function to log ticket actions
@@ -238,3 +245,61 @@ st.write("2. Make the necessary changes.")
 st.write("3. Click 'Update Ticket' to save your changes.")
 
 st.write("To view all tickets, click on 'Display Tickets' at the top of the page.")
+
+def handle_signup():
+    st.subheader('Sign Up')
+    username = st.text_input('Username')
+    password = st.text_input('Password', type='password')
+    confirm_password = st.text_input('Confirm Password', type='password')
+
+    if st.button('Sign Up'):
+        # Check if username already exists
+        existing_user = users_collection.find_one({'username': username})
+        if existing_user:
+            st.warning('Username already exists. Please choose another.')
+        elif password != confirm_password:
+            st.warning('Passwords do not match. Please try again.')
+        else:
+            # Hash the password and store the user details in the database
+            hashed_password = generate_password_hash(password, method='sha256')
+            users_collection.insert_one({'username': username, 'password': hashed_password})
+            st.success('Account created successfully! Please log in.')
+
+    st.write('Already have an account? [Log in](#login)')
+
+
+def handle_login():
+    st.subheader('Login')
+    username = st.text_input('Username')
+    password = st.text_input('Password', type='password')
+
+    if st.button('Login'):
+        user = users_collection.find_one({'username': username})
+        if user and check_password_hash(user['password'], password):
+            st.session_state.logged_in_user = username
+            st.success('Logged in successfully! Redirecting to main page...')
+            st.write('If not redirected, [click here](#main).')
+        else:
+            st.warning('Incorrect username or password. Please try again.')
+
+    st.write('Don't have an account? [Sign Up](#signup)')
+
+
+# Main app interface
+if 'logged_in_user' not in st.session_state:
+    action = st.radio("Choose an action:", ["Login", "Sign Up"])
+    if action == "Login":
+        handle_login()
+    elif action == "Sign Up":
+        handle_signup()
+else:
+    # The rest of the main app code goes here (i.e., the existing ticket management functionality)
+    st.write(f"Welcome, {st.session_state.logged_in_user}!")
+    # ... [rest of the app code] ...
+
+
+def handle_logout():
+    if st.button('Logout'):
+        del st.session_state.logged_in_user
+        st.write('Logged out successfully! Redirecting to login page...')
+        st.write('If not redirected, [click here](#login).')
