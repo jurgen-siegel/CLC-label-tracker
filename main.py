@@ -29,7 +29,8 @@ def log_ticket_action(ticket_num, action, description=""):
     Parameters:
     - ticket_num: The ticket number associated with the action.
     - action: The type of action (e.g., "added", "updated", "deleted").
-    - description: A description or summary of the changes made. """
+    - description: A description or summary of the changes made.
+    """
     history_entry = {
         'Ticket #': ticket_num,
         'Action': action,
