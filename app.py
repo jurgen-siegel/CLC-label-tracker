@@ -7,7 +7,7 @@ import main_content
 
 if not st.session_state.get('logged_in'):
     # Display Registration and Login UI
-    # This will use functions from user_auth.py
+    user_auth.display_login_registration_ui()
 else:
     # Display main app content
     main_content.display_main_content()
