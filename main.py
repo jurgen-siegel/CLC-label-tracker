@@ -86,7 +86,7 @@ if not df.empty:
     delete_ticket_num = st.selectbox('Select Ticket # to delete', df['Ticket #'].tolist())
     if st.button('Delete Selected Ticket'):
         collection.delete_one({'Ticket #': delete_ticket_num})
-    log_ticket_action(delete_ticket_num, "deleted", "Ticket deleted.")
+        log_ticket_action(delete_ticket_num, "deleted", "Ticket deleted.")
 
 else:
     st.write("No tickets available to delete.")
