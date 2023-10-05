@@ -1,5 +1,6 @@
-streamlit
-pandas
-pymongo
-matplotlib
+streamlit~=1.27.1
+pandas~=2.1.1
+pymongo~=4.5.0
+matplotlib~=3.8.0
 xlsxwriter
+werkzeug~=3.0.0
