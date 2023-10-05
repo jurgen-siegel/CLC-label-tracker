@@ -19,11 +19,11 @@ client = MongoClient(MONGO_URI)
 db = client.label_tracker
 collection = db.tickets
 
-# Create a new collection for ticket history
-ticket_history_collection = db.ticket_history
+# Create a new collection for ticket history:
+ticket_history_collection = db.ticket_history:
+:
 
-
-# Function to log ticket actions
+# Function to log ticket actions:
 def log_ticket_action(ticket_num, action, description=""):
     """ Log ticket actions to the ticket_history collection.
     Parameters:
@@ -71,9 +71,9 @@ if page == "Manage Tickets":
         log_ticket_action(ticket_num, "added", "Ticket added with details: " + str(new_data))
 collection.insert_one(new_data)
 
-# Display existing tickets for management
-st.subheader('Existing Tickets')
-tickets = list(collection.find({}))
+# Display existing tickets for management:
+st.subheader('Existing Tickets'):
+tickets = list(collection.find({})):
 for ticket in tickets:
     ticket['_id'] = str(ticket['_id'])
 df = pd.DataFrame(tickets)
@@ -94,7 +94,7 @@ else:
 # Edit a ticket
 st.subheader('Edit Ticket')
 
-# Check if there are any tickets to edit
+# Check if there are any tickets to edit:
 if not df.empty:
     edit_ticket_num = st.selectbox('Select Ticket # to edit', df['Ticket #'].tolist())
     selected_ticket = collection.find_one({'Ticket #': edit_ticket_num})
@@ -146,7 +146,7 @@ for ticket in tickets:
     del ticket['_id']
 df = pd.DataFrame(tickets)
 
-# Check if there are any tickets to display
+# Check if there are any tickets to display:
 if not df.empty:
     # Excel download button
     output = io.BytesIO()
@@ -157,11 +157,11 @@ if not df.empty:
         label="Download Excel file",
         data=excel_data,
         file_name="tickets.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-
-    # Search functionality
-    search_query = st.text_input("Search tickets (by Ticket #, Customer, Description, etc.)")
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",:
+    ):
+    :
+    # Search functionality:
+    search_query = st.text_input("Search tickets (by Ticket #, Customer, Description, etc.)"):
     if search_query:
         df = df[df[['Ticket #', 'Customer', 'Description']].apply(
             lambda row: row.astype(str).str.contains(search_query).any(), axis=1)]
@@ -206,11 +206,11 @@ if not df.empty:
     completed_count = df['completed'].sum()
     in_progress_count = df['in_progress'].sum()
     just_started_count = df['just_started'].sum()
-
-    labels = ['Completed', 'In Progress', 'Just Started']
-    sizes = [completed_count, in_progress_count, just_started_count]
-
-    # Check if there's any data to plot
+    :
+    labels = ['Completed', 'In Progress', 'Just Started']:
+    sizes = [completed_count, in_progress_count, just_started_count]:
+    :
+    # Check if there's any data to plot:
     if sum(sizes) > 0:
         fig, ax = plt.subplots(figsize=(5, 3))
         ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'],
@@ -225,15 +225,15 @@ if not df.empty:
     else:
         st.write("No matching tickets for the search criteria.")
 
-st.write("--------------------------------------------------------------------------")
-st.markdown("**Note: To manage tickets, follow these steps:**")
-st.write("1. Write down the ticket number, name, and description.")
-st.write("2. Check the appropriate boxes to indicate progress.")
-st.write("3. Click 'Add Ticket' to create a new ticket.")
+    st.write("--------------------------------------------------------------------------")
+    st.markdown("**Note: To manage tickets, follow these steps:**")
+    st.write("1. Write down the ticket number, name, and description.")
+    st.write("2. Check the appropriate boxes to indicate progress.")
+    st.write("3. Click 'Add Ticket' to create a new ticket.")
 
-st.write("To edit an existing ticket:")
-st.write("1. Pick the ticket number you want to modify.")
-st.write("2. Make the necessary changes.")
-st.write("3. Click 'Update Ticket' to save your changes.")
+    st.write("To edit an existing ticket:")
+    st.write("1. Pick the ticket number you want to modify.")
+    st.write("2. Make the necessary changes.")
+    st.write("3. Click 'Update Ticket' to save your changes.")
 
-st.write("To view all tickets, click on 'Display Tickets' at the top of the page.")
+    st.write("To view all tickets, click on 'Display Tickets' at the top of the page.")
