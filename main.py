@@ -134,7 +134,7 @@ if not df.empty:
 else:
     st.write("No tickets available to edit.")
 
-else:  # Display Tickets
+
 st.subheader('All Tickets')
 
 tickets = list(collection.find({}))
