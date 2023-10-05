@@ -204,10 +204,10 @@ if not df.empty:
     completed_count = df['completed'].sum()
     in_progress_count = df['in_progress'].sum()
     just_started_count = df['just_started'].sum()
-    :
-    labels = ['Completed', 'In Progress', 'Just Started']:
-    sizes = [completed_count, in_progress_count, just_started_count]:
-    :
+
+    labels = ['Completed', 'In Progress', 'Just Started']
+    sizes = [completed_count, in_progress_count, just_started_count]
+
     # Check if there's any data to plot:
     if sum(sizes) > 0:
         fig, ax = plt.subplots(figsize=(5, 3))
