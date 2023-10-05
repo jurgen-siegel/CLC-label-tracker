@@ -4,7 +4,6 @@ from pymongo import MongoClient
 import io
 import matplotlib.pyplot as plt
 import os
-from werkzeug.security import generate_password_hash, check_password_hash
 
 # Layout settings
 st.set_page_config(layout="wide")
@@ -23,9 +22,6 @@ collection = db.tickets
 # Create a new collection for ticket history
 ticket_history_collection = db.ticket_history
 
-# Create a collection for users
-users_collection = db.users
-
 
 # Function to log ticket actions
 def log_ticket_action(ticket_num, action, description=""):
@@ -43,80 +39,192 @@ def log_ticket_action(ticket_num, action, description=""):
     ticket_history_collection.insert_one(history_entry)
 
 
-# Function to handle sign-up
-# Function to handle sign-up
-def handle_signup():
-    st.subheader('Sign Up')
-    username = st.text_input('Username')
-    password = st.text_input('Password', type='password')
-    confirm_password = st.text_input('Confirm Password', type='password')
+# App title
+st.title('Label Progress')
 
-    if st.button('Sign Up'):
-        # Check if username already exists
-        existing_user = users_collection.find_one({'username': username})
-        if existing_user:
-            st.warning('Username already exists. Please choose another.')
-        elif password != confirm_password:
-            st.warning('Passwords do not match. Please try again.')
+page = st.radio("Pages", ["Manage Tickets", "Display Tickets"])
+
+if page == "Manage Tickets":
+    # Add new ticket
+    st.subheader('Add New Ticket')
+    ticket_num = st.text_input('Ticket #')
+    customer = st.text_input('Customer')
+    description = st.text_input('Description')
+    artwork_received = st.checkbox('Artwork Received')
+    physical_proof = st.checkbox('Physical Proof')
+    digital_approved = st.checkbox('Digital Approved')
+    sample = st.checkbox('Sample')
+    quote = st.checkbox('Quote')
+
+    if st.button('Add Ticket'):
+        new_data = {
+            'Ticket #': ticket_num,
+            'Customer': customer,
+            'Description': description,
+            'Artwork Received': artwork_received,
+            'Physical Proof': physical_proof,
+            'Digital Approved': digital_approved,
+            'Sample': sample,
+            'Quote': quote
+        }
+
+        log_ticket_action(ticket_num, "added", "Ticket added with details: " + str(new_data))
+        collection.insert_one(new_data)
+
+    # Display existing tickets for management
+    st.subheader('Existing Tickets')
+    tickets = list(collection.find({}))
+    for ticket in tickets:
+        ticket['_id'] = str(ticket['_id'])
+    df = pd.DataFrame(tickets)
+
+    st.write(df)
+
+    # Delete a ticket
+    st.subheader('Delete Ticket')
+    if not df.empty:
+        delete_ticket_num = st.selectbox('Select Ticket # to delete', df['Ticket #'].tolist())
+        if st.button('Delete Selected Ticket'):
+            collection.delete_one({'Ticket #': delete_ticket_num})
+            log_ticket_action(delete_ticket_num, "deleted", "Ticket deleted.")
+
+    else:
+        st.write("No tickets available to delete.")
+
+    # Edit a ticket
+    st.subheader('Edit Ticket')
+
+    # Check if there are any tickets to edit
+    if not df.empty:
+        edit_ticket_num = st.selectbox('Select Ticket # to edit', df['Ticket #'].tolist())
+        selected_ticket = collection.find_one({'Ticket #': edit_ticket_num})
+
+        if selected_ticket:
+            ticket_num_edit = st.text_input('Edit Ticket #', value=selected_ticket['Ticket #'])
+            customer_edit = st.text_input('Edit Customer', value=selected_ticket['Customer'])
+            description_edit = st.text_input('Edit Description', value=selected_ticket['Description'])
+            artwork_received_edit = st.checkbox('Edit Artwork Received', value=selected_ticket['Artwork Received'])
+            physical_proof_edit = st.checkbox('Edit Physical Proof', value=selected_ticket['Physical Proof'])
+            digital_approved_edit = st.checkbox('Edit Digital Approved', value=selected_ticket['Digital Approved'])
+            sample_edit = st.checkbox('Edit Sample', value=selected_ticket['Sample'])
+            quote_edit = st.checkbox('Edit Quote', value=selected_ticket['Quote'])
         else:
-            # Hash the password and store the user details in the database
-            hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+            st.warning("Selected ticket not found!")
+            ticket_num_edit = st.text_input('Edit Ticket #', value='')
+            customer_edit = st.text_input('Edit Customer', value='')
+            description_edit = st.text_input('Edit Description', value='')
+            artwork_received_edit = st.checkbox('Edit Artwork Received', value=False)
+            physical_proof_edit = st.checkbox('Edit Physical Proof', value=False)
+            digital_approved_edit = st.checkbox('Edit Digital Approved', value=False)
+            sample_edit = st.checkbox('Edit Sample', value=False)
+            quote_edit = st.checkbox('Edit Quote', value=False)
 
-            # Store the user data in the users_collection
-            user_data = {
-                'username': username,
-                'password': hashed_password
+        if st.button('Update Ticket'):
+            updated_data = {
+                'Ticket #': ticket_num_edit,
+                'Customer': customer_edit,
+                'Description': description_edit,
+                'Artwork Received': artwork_received_edit,
+                'Physical Proof': physical_proof_edit,
+                'Digital Approved': digital_approved_edit,
+                'Sample': sample_edit,
+                'Quote': quote_edit
             }
-            users_collection.insert_one(user_data)
+            collection.update_one({'Ticket #': edit_ticket_num}, {'$set': updated_data})
+            st.success('Ticket updated successfully!')
+    else:
+        st.write("No tickets available to edit.")
 
-            st.success('Account created successfully! Please log in.')
 
-    st.write('Already have an account? [Log in](#login)')
+else:  # Display Tickets
+    st.subheader('All Tickets')
+
+    tickets = list(collection.find({}))
+    for ticket in tickets:
+        ticket['Completed'] = all(
+            [ticket['Artwork Received'], ticket['Physical Proof'], ticket['Digital Approved'], ticket['Sample'],
+             ticket['Quote']])
+        del ticket['_id']
+    df = pd.DataFrame(tickets)
+
+    # Check if there are any tickets to display
+    if not df.empty:
+        # Excel download button
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, sheet_name='Tickets', index=False)
+        excel_data = output.getvalue()
+        st.download_button(
+            label="Download Excel file",
+            data=excel_data,
+            file_name="tickets.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        # Search functionality
+        search_query = st.text_input("Search tickets (by Ticket #, Customer, Description, etc.)")
+        if search_query:
+            df = df[df[['Ticket #', 'Customer', 'Description']].apply(
+                lambda row: row.astype(str).str.contains(search_query).any(), axis=1)]
 
 
-# Function to handle login
-def handle_login():
-    st.subheader('Login')
-    username = st.text_input('Username')
-    password = st.text_input('Password', type='password')
+        # Generate HTML table with color coding
+        def generate_html_table(dataframe):
+            styles = []
+            rows = []
+            for _, row in dataframe.iterrows():
+                checks_count = row[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum()
+                if checks_count == 1:
+                    style = 'background-color: #FFD6D6; color: black;'  # Very Light Red
+                elif 1 < checks_count < 5:
+                    style = 'background-color: #FFFFD6; color: black;'  # Very Light Yellow
+                elif checks_count == 5:
+                    style = 'background-color: #D6FFD6; color: black;'  # Very Light Green
+                else:
+                    style = 'color: black;'
+                styles.append(style)
 
-    if st.button('Login'):
-        user = users_collection.find_one({'username': username})
-        if user and check_password_hash(user['password'], password):
-            st.session_state.logged_in_user = username
-            st.success('Logged in successfully! Redirecting to main page...')
-            st.write('If not redirected, [click here](#main).')
+            for (index, row), style in zip(dataframe.iterrows(), styles):
+                row_str = f'<tr style="{style}">' + ''.join(f'<td>{cell}</td>' for cell in row) + '</tr>'
+                rows.append(row_str)
+
+            headers = '<tr>' + ''.join(f'<th>{col}</th>' for col in dataframe.columns) + '</tr>'
+            table = f'<table>{headers}' + ''.join(rows) + '</table>'
+            return table
+
+
+        html_string = generate_html_table(df)
+        st.markdown(html_string, unsafe_allow_html=True)
+
+        # Pie chart data
+        df['completed'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1) == 5
+        df['in_progress'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1).between(2, 4)
+        df['just_started'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(
+            axis=1) == 1
+
+        completed_count = df['completed'].sum()
+        in_progress_count = df['in_progress'].sum()
+        just_started_count = df['just_started'].sum()
+
+        labels = ['Completed', 'In Progress', 'Just Started']
+        sizes = [completed_count, in_progress_count, just_started_count]
+
+        # Check if there's any data to plot
+        if sum(sizes) > 0:
+            fig, ax = plt.subplots(figsize=(5, 3))
+            ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'],
+                   textprops={'color': 'white'})
+            ax.axis('equal')
+
+            # Set background color of the pie chart to transparent
+            fig.patch.set_facecolor('none')
+            ax.set_facecolor('none')
+
+            st.pyplot(fig)
         else:
-            st.warning('Incorrect username or password. Please try again.')
-
-    st.write('Don\'t have an account? [Sign Up](#signup)')
-
-
-# Function to handle logout
-def handle_logout():
-    if st.button('Logout'):
-        del st.session_state.logged_in_user
-        st.write('Logged out successfully! Redirecting to login page...')
-        st.write('If not redirected, [click here](#login).')
-
-
-# Main interface modifications for authentication
-if 'logged_in_user' in st.session_state:
-    st.write(f"Welcome, {st.session_state.logged_in_user}!")
-    handle_logout()
-
-    # Your ticket management code goes here
-    st.subheader('Ticket Management Placeholder')
-    st.write("You can add your ticket management functionality here.")
-    st.write("This is a placeholder for managing tickets.")
-    st.write("Add, edit, and delete tickets as needed.")
-
-else:
-    action = st.radio("Choose an action:", ["Login", "Sign Up"])
-    if action == "Login":
-        handle_login()
-    elif action == "Sign Up":
-        handle_signup()
+            st.write("No matching tickets for the search criteria.")
 
 st.write("--------------------------------------------------------------------------")
 st.markdown("**Note: To manage tickets, follow these steps:**")
