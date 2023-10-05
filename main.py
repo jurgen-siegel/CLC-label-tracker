@@ -20,8 +20,7 @@ db = client.label_tracker
 collection = db.tickets
 
 # Create a new collection for ticket history:
-ticket_history_collection = db.ticket_history:
-:
+ticket_history_collection = db.ticket_history
 
 # Function to log ticket actions:
 def log_ticket_action(ticket_num, action, description=""):
