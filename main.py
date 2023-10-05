@@ -9,44 +9,48 @@ if 'logged_in' not in st.session_state:
 # Registration UI
 if not st.session_state['logged_in']:
 
-if not st.session_state['logged_in']:
-    st.subheader("User Registration")
-    reg_username = st.text_input("Register Username", "")
-    reg_password = st.text_input("Register Password", type="password")
-    reg_email = st.text_input("Email", "")
-    if st.button('Register'):
-        # Check if user exists
-        user_exists = collection.find_one({"username": reg_username})
-        if user_exists:
-            st.warning("Username already exists. Please choose another.")
-        else:
-            # Hash the password and store user details
-            hashed_password = simple_hash(reg_password)
-            user_data = {
-                "username": reg_username,
-                "password": hashed_password,
-                "email": reg_email
-            }
-            collection.insert_one(user_data)
-            st.success("Registration successful. Please log in.")
-
-    # Login UI
-    st.subheader("User Login")
-    login_username = st.text_input("Login Username", "")
-    login_password = st.text_input("Login Password", type="password")
-    if st.button('Login'):
-        # Fetch user details
-        user_details = collection.find_one({"username": login_username})
-        if user_details:
-            # Check hashed password
-            if user_details["password"] == simple_hash(login_password):
-                st.session_state['logged_in'] = True
-                st.session_state['logged_in_user'] = login_username
-                st.success(f"Welcome, {login_username}!")
+    if not st.session_state['logged_in']:
+        st.subheader("User Registration")
+        reg_username = st.text_input("Register Username", "")
+        reg_password = st.text_input("Register Password", type="password")
+        reg_email = st.text_input("Email", "")
+        if st.button('Register'):
+            # Check if user exists
+            user_exists = collection.find_one({"username": reg_username})
+            if user_exists:
+                st.warning("Username already exists. Please choose another.")
             else:
-                st.warning("Incorrect password. Please try again.")
-        else:
-            st.warning("Username not found. Please register or try another username.")
+                # Hash the password and store user details
+                hashed_password = simple_hash(reg_password)
+                user_data = {
+                    "username": reg_username,
+                    "password": hashed_password,
+                    "email": reg_email
+                }
+                collection.insert_one(user_data)
+                st.success("Registration successful. Please log in.")
+
+        # Login UI
+        st.subheader("User Login")
+        login_username = st.text_input("Login Username", "")
+        login_password = st.text_input("Login Password", type="password")
+        if st.button('Login'):
+            # Fetch user details
+            user_details = collection.find_one({"username": login_username})
+            if user_details:
+                # Check hashed password
+                if user_details["password"] == simple_hash(login_password):
+                    st.session_state['logged_in'] = True
+                    st.session_state['logged_in_user'] = login_username
+                    st.success(f"Welcome, {login_username}!")
+                else:
+                    st.warning("Incorrect password. Please try again.")
+            else:
+                st.warning("Username not found. Please register or try another username.")
+    else:
+        st.subheader(f"Welcome {st.session_state['logged_in_user']}")
+        if st.button('Logout'):
+            st.session_state['logged_in'] = False
 else:
     st.subheader(f"Welcome {st.session_state['logged_in_user']}")
     if st.button('Logout'):
