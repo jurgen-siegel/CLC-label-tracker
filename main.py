@@ -264,4 +264,3 @@ if start_date and end_date:
     query["Date"] = {"$gte": start_date, "$lte": end_date}
 if selected_status != "All":
     query["Status"] = selected_status
-)
