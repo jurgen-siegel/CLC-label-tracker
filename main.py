@@ -2,6 +2,12 @@ import streamlit as st
 from pymongo import MongoClient
 import hashlib
 
+st.set_page_config(layout="wide")
+
+import streamlit as st
+from pymongo import MongoClient
+import hashlib
+
 # Check if user is logged in
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
@@ -63,7 +69,6 @@ import matplotlib.pyplot as plt
 import os
 
 # Layout settings
-st.set_page_config(layout="wide")
 
 # Retrieve MongoDB URI from environment variable
 MONGO_URI = os.environ.get("MONGO_URI")
