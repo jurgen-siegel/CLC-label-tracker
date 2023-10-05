@@ -69,7 +69,7 @@ if page == "Manage Tickets":
         }
 
         log_ticket_action(ticket_num, "added", "Ticket added with details: " + str(new_data))
-    collection.insert_one(new_data)
+        collection.insert_one(new_data)
 
     # Display existing tickets for management
     st.subheader('Existing Tickets')
