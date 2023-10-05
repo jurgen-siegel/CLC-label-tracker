@@ -29,8 +29,7 @@ def log_ticket_action(ticket_num, action, description=""):
     Parameters:
     - ticket_num: The ticket number associated with the action.
     - action: The type of action (e.g., "added", "updated", "deleted").
-    - description: A description or summary of the changes made.
-    """
+    - description: A description or summary of the changes made. """
     history_entry = {
         'Ticket #': ticket_num,
         'Action': action,
@@ -136,23 +135,7 @@ if page == "Manage Tickets":
     else:
         st.write("No tickets available to edit.")
 
-# UI for searching tickets by keyword
-search_keyword = st.text_input("Search Tickets by Keyword (Title or Description)", "")
 
-# UI for filtering tickets by date range
-start_date = st.date_input("Start Date", None)
-end_date = st.date_input("End Date", None)
-
-# UI for filtering tickets by status (assuming predefined statuses: Open, In Progress, Closed)
-status_options = ["All", "Open", "In Progress", "Closed"]
-selected_status = st.selectbox("Filter by Status", status_options)
-
-# Reset button to clear all filters
-if st.button('Reset Filters'):
-    search_keyword = ""
-    start_date = None
-    end_date = None
-    selected_status = "All"
 else:  # Display Tickets
     st.subheader('All Tickets')
 
@@ -255,12 +238,3 @@ st.write("2. Make the necessary changes.")
 st.write("3. Click 'Update Ticket' to save your changes.")
 
 st.write("To view all tickets, click on 'Display Tickets' at the top of the page.")
-# Filtering the tickets based on user input
-query = {}
-if search_keyword:
-    query["$or"] = [{"Title": {"$regex": search_keyword, "$options": "i"}},
-                    {"Description": {"$regex": search_keyword, "$options": "i"}}]
-if start_date and end_date:
-    query["Date"] = {"$gte": start_date, "$lte": end_date}
-if selected_status != "All":
-    query["Status"] = selected_status
