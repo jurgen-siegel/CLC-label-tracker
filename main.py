@@ -156,9 +156,8 @@ if not df.empty:
         label="Download Excel file",
         data=excel_data,
         file_name="tickets.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",:
-    ):
-    :
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",)
+
     # Search functionality:
     search_query = st.text_input("Search tickets (by Ticket #, Customer, Description, etc.)"):
     if search_query:
