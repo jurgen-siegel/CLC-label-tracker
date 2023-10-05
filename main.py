@@ -44,6 +44,7 @@ def log_ticket_action(ticket_num, action, description=""):
 
 
 # Function to handle sign-up
+# Function to handle sign-up
 def handle_signup():
     st.subheader('Sign Up')
     username = st.text_input('Username')
@@ -59,8 +60,15 @@ def handle_signup():
             st.warning('Passwords do not match. Please try again.')
         else:
             # Hash the password and store the user details in the database
-            hashed_password = generate_password_hash(password, method='sha256')
-            users_collection.insert_one({'username': username, 'password': hashed_password})
+            hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+
+            # Store the user data in the users_collection
+            user_data = {
+                'username': username,
+                'password': hashed_password
+            }
+            users_collection.insert_one(user_data)
+
             st.success('Account created successfully! Please log in.')
 
     st.write('Already have an account? [Log in](#login)')
