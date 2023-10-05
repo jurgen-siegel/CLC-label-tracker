@@ -71,8 +71,8 @@ if page == "Manage Tickets":
 collection.insert_one(new_data)
 
 # Display existing tickets for management:
-st.subheader('Existing Tickets'):
-tickets = list(collection.find({})):
+st.subheader('Existing Tickets')
+tickets = list(collection.find({}))
 for ticket in tickets:
     ticket['_id'] = str(ticket['_id'])
 df = pd.DataFrame(tickets)
