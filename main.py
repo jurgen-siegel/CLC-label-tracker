@@ -8,7 +8,7 @@ if not st.session_state['logged_in']:
     reg_username = st.text_input("Register Username", "")
     reg_password = st.text_input("Register Password", type="password")
     reg_email = st.text_input("Email", "")
-    if st.button('Register'):
+if st.button('Register'):
 
 # Check if user exists
 user_exists = collection.find_one({"username": reg_username})
