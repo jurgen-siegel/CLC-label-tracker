@@ -159,7 +159,7 @@ if not df.empty:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",)
 
     # Search functionality:
-    search_query = st.text_input("Search tickets (by Ticket #, Customer, Description, etc.)"):
+    search_query = st.text_input("Search tickets (by Ticket #, Customer, Description, etc.)")
     if search_query:
         df = df[df[['Ticket #', 'Customer', 'Description']].apply(
             lambda row: row.astype(str).str.contains(search_query).any(), axis=1)]
