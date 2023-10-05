@@ -253,7 +253,7 @@ st.write("1. Pick the ticket number you want to modify.")
 st.write("2. Make the necessary changes.")
 st.write("3. Click 'Update Ticket' to save your changes.")
 
-st.write("To view all tickets, click on 'Display Tickets' at the top of the page."
+st.write("To view all tickets, click on 'Display Tickets' at the top of the page.")
 # Filtering the tickets based on user input
 query = {}
 if search_keyword:
