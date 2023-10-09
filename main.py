@@ -19,26 +19,6 @@ client = MongoClient(MONGO_URI)
 db = client.label_tracker
 collection = db.tickets
 
-# Create a new collection for ticket history
-ticket_history_collection = db.ticket_history
-
-
-# Function to log ticket actions
-def log_ticket_action(ticket_num, action, description=""):
-    """ Log ticket actions to the ticket_history collection.
-    Parameters:
-    - ticket_num: The ticket number associated with the action.
-    - action: The type of action (e.g., "added", "updated", "deleted").
-    - description: A description or summary of the changes made. """
-    history_entry = {
-        'Ticket #': ticket_num,
-        'Action': action,
-        'Timestamp': pd.Timestamp.now(),
-        'Description': description
-    }
-    ticket_history_collection.insert_one(history_entry)
-
-
 # App title
 st.title('Label Progress')
 
@@ -67,8 +47,6 @@ if page == "Manage Tickets":
             'Sample': sample,
             'Quote': quote
         }
-
-        log_ticket_action(ticket_num, "added", "Ticket added with details: " + str(new_data))
         collection.insert_one(new_data)
 
     # Display existing tickets for management
@@ -86,8 +64,6 @@ if page == "Manage Tickets":
         delete_ticket_num = st.selectbox('Select Ticket # to delete', df['Ticket #'].tolist())
         if st.button('Delete Selected Ticket'):
             collection.delete_one({'Ticket #': delete_ticket_num})
-            log_ticket_action(delete_ticket_num, "deleted", "Ticket deleted.")
-
     else:
         st.write("No tickets available to delete.")
 
@@ -141,9 +117,7 @@ else:  # Display Tickets
 
     tickets = list(collection.find({}))
     for ticket in tickets:
-        ticket['Completed'] = all(
-            [ticket['Artwork Received'], ticket['Physical Proof'], ticket['Digital Approved'], ticket['Sample'],
-             ticket['Quote']])
+        ticket['Completed'] = all([ticket['Artwork Received'], ticket['Physical Proof'], ticket['Digital Approved'], ticket['Sample'], ticket['Quote']])
         del ticket['_id']
     df = pd.DataFrame(tickets)
 
