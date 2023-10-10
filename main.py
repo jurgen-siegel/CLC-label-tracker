@@ -42,7 +42,7 @@ def log_ticket_action(ticket_num, action, description=""):
 # App title
 st.title('Label Progress')
 
-page = st.radio("Pages", ["Manage Tickets", "Display Tickets"])
+page = st.radio("Pages", ["Dashboard", "Manage Tickets", "Display Tickets"])
 
 if page == "Manage Tickets":
     # Add new ticket
@@ -225,6 +225,40 @@ else:  # Display Tickets
             st.pyplot(fig)
         else:
             st.write("No matching tickets for the search criteria.")
+
+if page == "Dashboard":
+    st.title('Dashboard Overview')
+
+    # Total tickets count
+    total_tickets = collection.count_documents({})
+    st.metric(label="Total Tickets", value=total_tickets)
+
+    # Tickets by status
+    tickets = list(collection.find({}))
+    df = pd.DataFrame(tickets)
+    df['Completed'] = df[['Artwork Received', 'Physical Proof', 'Digital Approved', 'Sample', 'Quote']].sum(axis=1) == 5
+    status_counts = df['Completed'].value_counts()
+
+    st.subheader('Tickets by Status')
+    fig, ax = plt.subplots()
+    ax.bar(status_counts.index, status_counts.values, color=['green', 'red'], tick_label=['Completed', 'In Progress'])
+    st.pyplot(fig)
+
+    # Tickets by priority (if implemented)
+    # priority_counts = df['Priority'].value_counts()
+    # st.subheader('Tickets by Priority')
+    # fig, ax = plt.subplots()
+    # ax.bar(priority_counts.index, priority_counts.values, color=['red', 'yellow', 'green'])
+    # st.pyplot(fig)
+
+    # Recent activity (last 5 actions from ticket_history)
+    st.subheader('Recent Activity')
+    recent_activity = list(ticket_history_collection.find().sort("Timestamp", -1).limit(5))
+    recent_activity_df = pd.DataFrame(recent_activity)
+    st.write(recent_activity_df[['Ticket #', 'Action', 'Timestamp', 'Description']])
+
+    # Other visualizations and metrics can be added as needed
+
 
 st.write("--------------------------------------------------------------------------")
 st.markdown("**Note: To manage tickets, follow these steps:**")

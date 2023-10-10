@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.11 (clctracker)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (clctracker)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (CLC-label-tracker)" project-jdk-type="Python SDK" />
 </project>
