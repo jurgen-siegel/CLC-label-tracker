@@ -1,11 +1,6 @@
 import streamlit as st
 import pandas as pd
 from pymongo import MongoClient
-import io
-from pyecharts import options as opts
-from pyecharts.charts import Pie
-from pyecharts.faker import Faker
-from streamlit_pyecharts import st_pyecharts
 import os
 
 # Layout settings
