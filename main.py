@@ -257,44 +257,7 @@ if page == "Dashboard":
     recent_activity_df = pd.DataFrame(recent_activity)
     st.write(recent_activity_df[['Ticket #', 'Action', 'Timestamp', 'Description']])
 
-    # Assuming df is the dataframe with all tickets data
-    df['Status'] = df.apply(lambda row: 'Completed' if row['Completed'] else ('In Progress' if row[['Artwork Received',
-                                                                                                    'Physical Proof',
-                                                                                                    'Digital Approved',
-                                                                                                    'Sample',
-                                                                                                    'Quote']].sum() > 0 else 'Not Started'),
-                            axis=1)
-    status_counts = df['Status'].value_counts()
-
-    st.subheader('Breakdown of Ticket Statuses')
-    fig, ax = plt.subplots()
-    ax.pie(status_counts, labels=status_counts.index, autopct='%1.1f%%', startangle=90,
-           colors=['green', 'yellow', 'grey'])
-    ax.axis('equal')
-    st.pyplot(fig)
-
-df['Duration'] = (df['Completion_Timestamp'] - df['Creation_Timestamp']).dt.days
-avg_duration = df['Duration'].mean()
-
-st.metric(label="Average Time to Completion", value=f"{avg_duration:.2f} days")
-
-tickets_created = df.resample('M', on='Creation_Timestamp').size()
-tickets_resolved = df.resample('M', on='Completion_Timestamp').size()
-
-st.subheader('Tickets Created vs Resolved')
-fig, ax = plt.subplots()
-ax.plot(tickets_created.index, tickets_created.values, label='Created', color='blue')
-ax.plot(tickets_resolved.index, tickets_resolved.values, label='Resolved', color='green')
-ax.legend()
-st.pyplot(fig)
-
-top_customers = df['Customer'].value_counts().head(5)
-
-st.subheader('Top Customers by Ticket Volume')
-fig, ax = plt.subplots()
-ax.bar(top_customers.index, top_customers.values, color='skyblue')
-st.pyplot(fig)
-
+    # Other visualizations and metrics can be added as needed
 
 
 st.write("--------------------------------------------------------------------------")
